@@ -1,0 +1,10 @@
+langchain
+langchain-community
+langchain-openai
+sentence-transformers
+faiss-cpu
+pandas
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
