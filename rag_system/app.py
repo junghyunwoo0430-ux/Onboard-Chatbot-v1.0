@@ -1,106 +1,187 @@
 import os
-from fastapi import FastAPI
+from typing import List
+
+from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from dotenv import load_dotenv
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel
 
-from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_community.vectorstores import FAISS
+from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnableLambda, RunnablePassthrough
+from langchain_openai import ChatOpenAI
 
-# --- RAG 체인 설정 (기존 코드 활용) ---
-FAISS_PATH = "faiss_index"
-EMBEDDING_MODEL = "jhgan/ko-sroberta-multitask"
+from config import (
+    get_api_prefix,
+    get_context_max_chars,
+    get_cors_origins,
+    get_embedding_model,
+    get_faiss_path,
+    get_llm_base_url,
+    get_openai_api_key,
+    get_retriever_k,
+)
+
+
+def format_docs(docs: List[Document], max_chars: int | None = None) -> str:
+    limit = max_chars or get_context_max_chars()
+    parts = []
+    for i, doc in enumerate(docs, 1):
+        source = doc.metadata.get("source") or doc.metadata.get("path") or ""
+        parts.append(f"[{i}] (src: {source})\n{doc.page_content.strip()}\n")
+
+    text = "\n---\n".join(parts).strip()
+    return text[:limit] if len(text) > limit else text
+
 
 def setup_rag_chain():
-    # .env 파일에서 환경 변수 로드
-    load_dotenv()
+    faiss_path = get_faiss_path()
+    if not faiss_path.exists():
+        raise FileNotFoundError(
+            f"Vector store not found at '{faiss_path}'. Run create_vector_store.py first."
+        )
 
-    if not os.path.exists(FAISS_PATH):
-        raise FileNotFoundError(f"오류: 벡터 저장소 '{FAISS_PATH}'를 찾을 수 없습니다. 'create_vector_store.py'를 먼저 실행해주세요.")
+    embeddings = HuggingFaceEmbeddings(model_name=get_embedding_model())
+    vectorstore = FAISS.load_local(str(faiss_path), embeddings, allow_dangerous_deserialization=True)
+    retriever = vectorstore.as_retriever(search_kwargs={"k": get_retriever_k()})
 
-    llm_base_url = os.getenv("LLM_BASE_URL")
-    if not llm_base_url:
-        raise ValueError("환경 변수 'LLM_BASE_URL'이 설정되지 않았습니다. .env 파일을 확인해주세요.")
+    template = """
+당신은 Webonomics 회사 정보를 안내하는 AI 챗봇입니다.
+아래 가이드라인을 따라 답변을 생성해 주세요.
 
-    embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
-    vectorstore = FAISS.load_local(FAISS_PATH, embeddings, allow_dangerous_deserialization=True)
-    retriever = vectorstore.as_retriever()
+[가이드라인]
+1) 검색된 정보가 질문과 관련이 있다면 해당 정보를 우선 사용합니다.
+2) 검색된 정보만으로 부족하면 일반 지식을 보완해 답변합니다.
+3) 답변은 항상 친절하고 명확한 한국어로 작성합니다.
 
-    template = '''
-    당신은 국립경국대학교의 정보를 알려주는 친절한 AI 챗봇입니다.
-    사용자의 질문에 답변하기 위해 아래의 검색된 정보를 참고하세요.
-    정보에 없는 내용이라면, 상상해서 답변하지 말고 모른다고 솔직하게 말하세요.
-    답변은 항상 한국어로 해주세요.
+[검색된 정보]
+{context}
 
-    [검색된 정보]
-    {context}
+[질문]
+{question}
 
-    [질문]
-    {question}
+[답변]
+""".strip()
 
-    [답변]
-    '''
     prompt = ChatPromptTemplate.from_template(template)
-
     llm = ChatOpenAI(
-        base_url=llm_base_url,
-        api_key="not-needed"
+        base_url=get_llm_base_url(),
+        api_key=get_openai_api_key(),
     )
 
-    rag_chain = (
-        {"context": retriever, "question": RunnablePassthrough()}
+    return (
+        {
+            "context": retriever | RunnableLambda(format_docs),
+            "question": RunnablePassthrough(),
+        }
         | prompt
         | llm
         | StrOutputParser()
     )
-    return rag_chain
 
-# --- FastAPI 애플리케이션 설정 ---
-app = FastAPI()
 
-# CORS 미들웨어 설정 (React 앱과 통신하기 위함)
+api_prefix = get_api_prefix()
+
+app = FastAPI(
+    title="Webonomics RAG Chatbot",
+    docs_url=f"{api_prefix}/docs",
+    openapi_url=f"{api_prefix}/openapi.json",
+)
+cors_origins = get_cors_origins()
+api_router = APIRouter(prefix=api_prefix)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 실제 운영 시에는 React 앱의 주소로 변경하는 것이 안전합니다.
-    allow_credentials=True,
+    allow_origins=cors_origins,
+    allow_credentials=cors_origins != ["*"],
     allow_methods=["*"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
+
 
 class ChatRequest(BaseModel):
     question: str
 
-from fastapi.responses import JSONResponse
 
-# RAG 체인 전역 변수로 로드
 rag_chain = None
+
 
 @app.on_event("startup")
 def on_startup():
     global rag_chain
-    print("RAG 체인을 로드합니다...")
+    print("Loading RAG chain...")
     rag_chain = setup_rag_chain()
-    print("RAG 체인 로드 완료.")
+    print("RAG chain loaded.")
+
+
+def build_service_info():
+    return {
+        "service": "Webonomics RAG Chatbot",
+        "status": "ok" if rag_chain is not None else "initing",
+        "docs": f"{api_prefix}/docs",
+        "openapi": f"{api_prefix}/openapi.json",
+        "chat_endpoints": ["/chat", f"{api_prefix}/chat"],
+        "health_endpoints": ["/health", f"{api_prefix}/health"],
+    }
+
+
+@app.get("/")
+def root():
+    return build_service_info()
+
+
+@app.get(api_prefix)
+def version_root():
+    return build_service_info()
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok" if rag_chain is not None else "initing"}
+
+
+@api_router.get("/health")
+def versioned_health():
+    return health()
+
+
+def handle_chat(request: ChatRequest):
+    if rag_chain is None:
+        return JSONResponse(status_code=500, content={"answer": "챗봇이 아직 초기화되지 않았습니다."})
+
+    question = (request.question or "").strip()
+    if not question:
+        return JSONResponse(status_code=400, content={"answer": "질문을 입력해 주세요."})
+
+    try:
+        answer = (rag_chain.invoke(question) or "").strip()
+        return {"answer": answer}
+    except Exception as exc:
+        print(f"[ERROR] Chat request failed: {exc!r}")
+        return JSONResponse(
+            status_code=500,
+            content={"answer": "질문을 처리하는 중 서버 오류가 발생했습니다."},
+        )
+
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-    if rag_chain is None:
-        return JSONResponse(status_code=500, content={"answer": "오류: 챗봇이 초기화되지 않았습니다."})
-    
-    try:
-        question = request.question
-        answer = rag_chain.invoke(question)
-        return {"answer": answer}
-    except Exception as e:
-        print(f"Error during RAG chain invocation: {e}")
-        return JSONResponse(status_code=500, content={"answer": "죄송합니다, 질문을 처리하는 동안 서버에서 오류가 발생했습니다."})
+    return handle_chat(request)
 
-# 서버 실행을 위한 uvicorn 설정
+
+@api_router.post("/chat")
+def versioned_chat(request: ChatRequest):
+    return handle_chat(request)
+
+
+app.include_router(api_router)
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+    port = int(os.getenv("BACKEND_PORT", "8000"))
+    uvicorn.run(app, host="0.0.0.0", port=port)

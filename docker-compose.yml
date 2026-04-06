@@ -1,0 +1,40 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: rag_system/Dockerfile
+    environment:
+      LLM_BASE_URL: ${LLM_BASE_URL:-http://host.docker.internal:1234/v1}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-not-needed}
+      FAISS_PATH: ${FAISS_PATH:-faiss_index}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-jhgan/ko-sroberta-multitask}
+      DATA_PATHS: ${DATA_PATHS:-../webonomics_chunked.jsonl,../pdf_chunked.jsonl}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://localhost:8080}
+      RETRIEVER_K: ${RETRIEVER_K:-5}
+      CONTEXT_MAX_CHARS: ${CONTEXT_MAX_CHARS:-4000}
+      API_PREFIX: ${API_PREFIX:-/v1}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/workspace
+    working_dir: /workspace/rag_system
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 45s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: rag_frontend/Dockerfile
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-/api/v1}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "8080:80"

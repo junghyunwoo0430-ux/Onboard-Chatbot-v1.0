@@ -1,0 +1,18 @@
+C:\Users\user\Desktop\newC\rag_system\app.py:121: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [27920]
+INFO:     Waiting for application startup.
+C:\Users\user\Desktop\newC\rag_system\app.py:59: LangChainDeprecationWarning: The class `HuggingFaceEmbeddings` was deprecated in LangChain 0.2.2 and will be removed in 1.0. An updated version of the class exists in the `langchain-huggingface package and should be used instead. To use it run `pip install -U `langchain-huggingface` and import as `from `langchain_huggingface import HuggingFaceEmbeddings``.
+  embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+forrtl: error (200): program aborting due to window-CLOSE event
+Image              PC                Routine            Line        Source             
+KERNELBASE.dll     00007FFC693EC24D  Unknown               Unknown  Unknown
+KERNEL32.DLL       00007FFC6AC1E8D7  Unknown               Unknown  Unknown
+ntdll.dll          00007FFC6BFAC53C  Unknown               Unknown  Unknown

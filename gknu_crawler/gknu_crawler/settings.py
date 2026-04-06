@@ -20,6 +20,6 @@ MEDIA_ALLOW_REDIRECTS = False
 
 # 출력: JSON Lines & CSV 두 가지 예시 (원하는 것만 남기세요)
 FEEDS = {
-    "outputs/gknu_chatbot_data.jsonl": {"format": "jsonlines", "encoding": "utf8", "overwrite": True},
-    "outputs/gknu_chatbot_data.csv": {"format": "csv", "encoding": "utf8", "overwrite": True},
+    "outputs/webonomics_data.jsonl": {"format": "jsonlines", "encoding": "utf8", "overwrite": True},
+    "outputs/webonomics_data.csv": {"format": "csv", "encoding": "utf8", "overwrite": True},
 }
