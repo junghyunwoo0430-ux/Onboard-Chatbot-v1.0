@@ -1,4 +1,4 @@
-# 국립경국대학교 RAG 챗봇 - 백엔드
+# RAG 챗봇 - 백엔드
 
 LangChain과 FastAPI를 사용하여 구축된 Retrieval-Augmented Generation (RAG) 챗봇의 백엔드 API 서버입니다. 로컬 LLM 모델(LM Studio)과 연동하여 질문에 대한 답변을 생성합니다.
 
