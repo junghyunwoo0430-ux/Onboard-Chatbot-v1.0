@@ -239,7 +239,7 @@ class WebonomicsCrawler:
                 "source": self.base_url,
                 "total_documents": len(pages),
                 "crawl_date": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "description": "웨보노믹스 회사 정보 RAG 지식 저장소",
+                "description": "RAG 지식 저장소",
             },
             "documents": pages,
         }
