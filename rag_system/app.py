@@ -49,7 +49,7 @@ def setup_rag_chain():
     retriever = vectorstore.as_retriever(search_kwargs={"k": get_retriever_k()})
 
     template = """
-당신은 Webonomics 회사 정보를 안내하는 AI 챗봇입니다.
+당신은 대학입시 정보를 안내하는 AI 챗봇입니다.
 아래 가이드라인을 따라 답변을 생성해 주세요.
 
 [가이드라인]
@@ -119,7 +119,7 @@ def on_startup():
 
 def build_service_info():
     return {
-        "service": "Webonomics RAG Chatbot",
+        "service": "KOREA RAG Chatbot",
         "status": "ok" if rag_chain is not None else "initing",
         "docs": f"{api_prefix}/docs",
         "openapi": f"{api_prefix}/openapi.json",
