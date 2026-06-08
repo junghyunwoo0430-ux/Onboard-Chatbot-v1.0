@@ -1,4 +1,4 @@
-# Webonomics Chatbot Handover Guide
+# Chatbot Handover Guide
 
 ## 1. Program Summary
 
