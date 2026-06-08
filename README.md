@@ -5,7 +5,7 @@
 Python FastAPI로 구현된 백엔드가 LangChain을 사용하여 지식 베이스에서 관련 정보를 검색하고, LM Studio를 통해 구동되는 로컬 LLM이 최종 답변을 생성합니다. React로 제작된 프론트엔드는 사용자가 편리하게 챗봇과 상호작용할 수 있는 웹 인터페이스를 제공합니다.
 
 <img width="1125" height="1336" alt="image" src="https://github.com/user-attachments/assets/ca4a6ada-c4ba-43be-bae3-9773486b9c91" />
-
+<img width="1125" height="1336" alt="image" src="https://github.com/user-attachments/assets/2c56acdd-566c-4dc4-8223-06a08f6d2673" />
 
 ## 2. 기술 스택
 
