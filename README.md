@@ -1,8 +1,6 @@
-# 국립경국대학교 RAG 챗봇 프로젝트
+# RAG 챗봇 프로젝트
 
 ## 1. 프로젝트 개요
-
-이 프로젝트는 국립경국대학교 관련 정보를 제공하는 Retrieval-Augmented Generation (RAG) 챗봇 시스템입니다.
 
 Python FastAPI로 구현된 백엔드가 LangChain을 사용하여 지식 베이스에서 관련 정보를 검색하고, LM Studio를 통해 구동되는 로컬 LLM이 최종 답변을 생성합니다. React로 제작된 프론트엔드는 사용자가 편리하게 챗봇과 상호작용할 수 있는 웹 인터페이스를 제공합니다.
 
@@ -16,7 +14,7 @@ Python FastAPI로 구현된 백엔드가 LangChain을 사용하여 지식 베이
 
 ```
 .
-├── gknu_chatbot_data_cleaned.csv  # RAG를 위한 정제된 데이터
+├── chatbot_data_cleaned.csv  # RAG를 위한 정제된 데이터
 ├── rag_frontend/                  # React 프론트엔드
 │   ├── public/
 │   ├── src/
@@ -63,3 +61,4 @@ Python FastAPI로 구현된 백엔드가 LangChain을 사용하여 지식 베이
     npm start
     ```
 2.  **접속**: 웹 브라우저에서 `http://localhost:3000` 주소로 접속하여 챗봇을 사용합니다.
+"# Onboard-Chatbot-v1.0" 
