@@ -1,8 +1,11 @@
-# RAG 챗봇 프로젝트
+# Onboard Chatbot (온보드 챗봇) 프로젝트
 
 ## 1. 프로젝트 개요
 
 Python FastAPI로 구현된 백엔드가 LangChain을 사용하여 지식 베이스에서 관련 정보를 검색하고, LM Studio를 통해 구동되는 로컬 LLM이 최종 답변을 생성합니다. React로 제작된 프론트엔드는 사용자가 편리하게 챗봇과 상호작용할 수 있는 웹 인터페이스를 제공합니다.
+
+<img width="1125" height="1336" alt="q1" src="https://github.com/user-attachments/assets/ab789a88-2c1e-4364-b7a3-650c33d85bde" />
+<img width="1125" height="1336" alt="q4" src="https://github.com/user-attachments/assets/2964daca-ad38-4d07-ad94-4f9a6c0a078f" />
 
 ## 2. 기술 스택
 
