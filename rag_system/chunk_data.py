@@ -6,7 +6,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from config import PROJECT_ROOT
 
-INPUT_PATH = PROJECT_ROOT / "gknu_crawler" / "webonomics_all_pages.jsonl"
+INPUT_PATH = PROJECT_ROOT / "webonomics_all_pages.jsonl"
 OUTPUT_PATH = PROJECT_ROOT / "webonomics_chunked.jsonl"
 BOILERPLATE_PATTERNS = [
     r"Loading the content\.\.\.",
