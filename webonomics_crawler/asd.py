@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-웨보노믹스 RAG 지식 저장소 크롤러
+ RAG 지식 저장소 크롤러
 - 웹사이트 전체 크롤링
 - 완전 중복 제거 (해시 기반)
 - RAG용 청크 생성
@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class WebonomicsCrawler:
     """
-    웨보노믹스 사이트 크롤러 + RAG 지식 저장소 생성기
+    사이트 크롤러 + RAG 지식 저장소 생성기
 
     기능:
     1. 전체 사이트 재귀적 크롤링
