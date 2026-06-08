@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-웨보노믹스 RAG 지식 저장소 크롤러 (초고속 aiohttp 버전)
+ RAG 지식 저장소 크롤러 (초고속 aiohttp 버전)
 - 병렬 HTTP 요청 (aiohttp)
 - 완전 중복 제거 (SHA-256)
 - 전체 페이지 크롤링
